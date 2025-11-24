@@ -2,3 +2,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components{
+    .toast{
+        animation: slide .5s 1;
+    }
+
+    .toast[data-position="top-right"]{
+        @apply top-2 right-2
+    }
+
+    .toast[data-position="top-left"]{
+        @apply top-2 left-2
+    }
+
+    .toast[data-position="bottom-right"]{
+        @apply bottom-2 right-2
+    }
+    .toast[data-position="bottom-left"]{
+        @apply bottom-2 left-2
+    }
+
+    @keyframes slide {
+        0%{
+            transform: translateX(100%);
+        }
+        100%{
+            transform: translateX(0%);
+        }
+    }
+
+
+}
