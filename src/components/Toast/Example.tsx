@@ -1,16 +1,15 @@
-import { useState } from "react"
-import Toast from "./Toast"
+import { useToastContext } from "./ToastProvider";
 
 const Example = () => {
-  const [showToast, setShowToast] = useState(false);
 
+  const {addNotification} = useToastContext();
   const toggleToast = ()=>{
-    setShowToast(!showToast);
+    addNotification({title:'Hello'+new Date().getTime(),cta: null,
+      onRemove:()=> console.log(1)
+    })
   }
   return (
     <div>
-
-        <Toast show={showToast} title="Hello"  cta={null} id={1} type="danger" />
         <button onClick={()=> toggleToast()}>Success Toast</button>
         <button>Warning Toast</button>
         <button>Info Toast</button>

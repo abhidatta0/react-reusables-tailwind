@@ -8,18 +8,18 @@
         animation: slide .5s 1;
     }
 
-    .toast[data-position="top-right"]{
+    .toast-container[data-position="top-right"]{
         @apply top-2 right-2
     }
 
-    .toast[data-position="top-left"]{
+    .toast-container[data-position="top-left"]{
         @apply top-2 left-2
     }
 
-    .toast[data-position="bottom-right"]{
+    .toast-container[data-position="bottom-right"]{
         @apply bottom-2 right-2
     }
-    .toast[data-position="bottom-left"]{
+    .toast-container[data-position="bottom-left"]{
         @apply bottom-2 left-2
     }
 

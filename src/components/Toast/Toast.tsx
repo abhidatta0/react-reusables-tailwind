@@ -2,7 +2,6 @@ import { ReactNode } from "react"
 import { BadgeCheck,LucideIcon, CircleAlert , BadgeInfo} from 'lucide-react';
 
 type ToastType = 'info'|'danger'|"success";
-type Position = 'top-right'|'top-left'|"bottom-right"|'bottom-left';
 
 
 const Icon:Record<ToastType,LucideIcon> = {
@@ -30,22 +29,18 @@ const progressColor:Record<ToastType,string> = {
 };
 
 
-
-
-type Props = {
-  show: boolean,
-  id:number,
+export type Props = {
+  id: number,
   title: string,
   description?:string,
-  onRemove?:()=> void,
-  cta:ReactNode,
+  onRemove?:(id: number)=> void,
+  cta?:ReactNode,
   type?:ToastType,
-  position?:Position,
-}
+};
 
-const Toast = ({show,title,description,cta,onRemove, type = 'info',position='top-right'}:Props) => {
+const Toast = ({title,description,cta,onRemove, type = 'info',id}:Props) => {
   const handleRemove = ()=>{
-    onRemove?.();
+    onRemove?.(id);
   }
 
   const TypeIcon = Icon[type];
@@ -53,9 +48,8 @@ const Toast = ({show,title,description,cta,onRemove, type = 'info',position='top
 
 
   return (
-    <div>
-      {show && <div data-position={position} className={`fixed  toast w-[400px] border ${borderColor[type]} rounded-lg overflow-hidden`}>
-        <button onClick={handleRemove} className="absolute right-2 top-1 bg-transparent">&times;</button>
+      <div className={`relative  toast w-[400px] border ${borderColor[type]} rounded-lg overflow-hidden`}>
+        {onRemove && <button onClick={handleRemove} className="absolute right-2 top-1 bg-transparent">&times;</button>}
         <div className="flex items-center gap-3 p-3">
           <div className="flex items-center gap-2 flex-1 ">
              <TypeIcon className={TypeIconColor} size={20}/>
@@ -69,8 +63,7 @@ const Toast = ({show,title,description,cta,onRemove, type = 'info',position='top
           </div>}
         </div>
         <div className={`h-1 w-full absolute bottom-0 left-0 ${progressColor[type]} border-l-0 border-r-0`}></div>
-      </div>}
-    </div>
+      </div>
   )
 }
 export default Toast
