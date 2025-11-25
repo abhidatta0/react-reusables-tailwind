@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { BadgeCheck,LucideIcon, CircleAlert , BadgeInfo} from 'lucide-react';
 
 type ToastType = 'info'|'danger'|"success";
@@ -29,27 +29,50 @@ const progressColor:Record<ToastType,string> = {
 };
 
 
-export type Props = {
-  id: number,
+export type ParamsFromComp = {
   title: string,
   description?:string,
-  onRemove?:(id: number)=> void,
   cta?:ReactNode,
   type?:ToastType,
-};
+  duration?: number,
+  id: number,
+  canRemove?: boolean,  // if true will show a close icon
+}
+export type Props = {
+  onRemove:(id: number)=> void,
+} & ParamsFromComp;
 
-const Toast = ({title,description,cta,onRemove, type = 'info',id}:Props) => {
+const Toast = ({title,description,cta,onRemove, type = 'info',id, duration = 5000, canRemove = false}:Props) => {
   const handleRemove = ()=>{
-    onRemove?.(id);
+    onRemove(id);
   }
 
+  const [widthPerc, setWidthPerc] = useState(100);
   const TypeIcon = Icon[type];
   const TypeIconColor = IconColor[type];
 
+  useEffect(()=>{
+
+    const intervalId = setInterval(()=>{
+      const hundrethPart = duration / 100; // decreasing on every 100th second
+      const percentToReduce = 100 / hundrethPart;
+      setWidthPerc((prev)=> prev <= 0 ? 0 : prev - percentToReduce)
+    },100);
+
+    return ()=> clearInterval(intervalId);
+  },[]);
+
+  useEffect(()=>{
+    if(widthPerc === 0){
+     handleRemove();
+    }
+  },[widthPerc])
+
+  // console.log({widthPerc})
 
   return (
       <div className={`relative  toast w-[400px] border ${borderColor[type]} rounded-lg overflow-hidden`}>
-        {onRemove && <button onClick={handleRemove} className="absolute right-2 top-1 bg-transparent">&times;</button>}
+        {canRemove && <button onClick={handleRemove} className="absolute right-2 top-1 bg-transparent">&times;</button>}
         <div className="flex items-center gap-3 p-3">
           <div className="flex items-center gap-2 flex-1 ">
              <TypeIcon className={TypeIconColor} size={20}/>
@@ -62,7 +85,7 @@ const Toast = ({title,description,cta,onRemove, type = 'info',id}:Props) => {
              {cta}
           </div>}
         </div>
-        <div className={`h-1 w-full absolute bottom-0 left-0 ${progressColor[type]} border-l-0 border-r-0`}></div>
+        <div style={{width: `${widthPerc}%`}} className={`h-1 absolute bottom-0 left-0 ${progressColor[type]} border-l-0 border-r-0`}></div>
       </div>
   )
 }

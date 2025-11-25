@@ -1,11 +1,13 @@
-import { createContext, ReactNode, useCallback, useState,useContext } from "react"
-import { Props as ToastProps } from "./Toast";
+import { createContext, ReactNode, useCallback, useState,useContext, useEffect } from "react"
+import { ParamsFromComp } from "./Toast";
 import ToastContainer from "./ToastContainer";
+import ToastService from "./ToastService";
 
 export type Position = 'top-right'|'top-left'|"bottom-right"|'bottom-left';
+export type AddNotificationParam = Omit<ParamsFromComp,'id'>;
 
 type ToastContextType = {
-  addNotification:(params: Omit<ToastProps,'id'>) => void
+  addNotification:(params: AddNotificationParam) => void
 }
 const ToastContext = createContext<ToastContextType|null>(null);
 
@@ -15,17 +17,21 @@ type Props = {
 }
 const ToastProvider = ({children,position = 'top-right'}:Props) => {
 
-  const [toasts, setToasts] = useState<ToastProps[]>([]);
+  const [toasts, setToasts] = useState<ParamsFromComp[]>([]);
 
   // remove toast by id from list
   const handleRemove = (id: number)=>{
     setToasts([...toasts].filter(toast => toast.id !== id));
   }
 
-  const addNotification = useCallback(({title, description, type, cta,onRemove}:Omit<ToastProps,'id'>)=>{
+  const addNotification = useCallback((params:AddNotificationParam)=>{
     const id = new Date().getTime();
-    const obj = {title, description, type, cta, id,onRemove};
+    const obj = {...params, id};
     setToasts(prev=> ([obj,...prev]))
+  },[]);
+
+  useEffect(()=>{
+    ToastService.registerNotification(addNotification);
   },[]);
   return (
     <>
