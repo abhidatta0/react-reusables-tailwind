@@ -47,6 +47,8 @@ const Toast = ({title,description,cta,onRemove, type = 'info',id, duration = 500
     onRemove(id);
   }
 
+  const [isHovered, setIsHovered] = useState(false);
+
   const [widthPerc, setWidthPerc] = useState(100);
   const TypeIcon = Icon[type];
   const TypeIconColor = IconColor[type];
@@ -54,13 +56,17 @@ const Toast = ({title,description,cta,onRemove, type = 'info',id, duration = 500
   useEffect(()=>{
 
     const intervalId = setInterval(()=>{
-      const hundrethPart = duration / 100; // decreasing on every 100th second
+      const hundrethPart = duration / 80; // decreasing on every 100th second
       const percentToReduce = 100 / hundrethPart;
+
+      if(isHovered){
+        return;
+      }
       setWidthPerc((prev)=> prev <= 0 ? 0 : prev - percentToReduce)
-    },100);
+    },80);
 
     return ()=> clearInterval(intervalId);
-  },[]);
+  },[isHovered]);
 
   useEffect(()=>{
     if(widthPerc === 0){
@@ -71,7 +77,9 @@ const Toast = ({title,description,cta,onRemove, type = 'info',id, duration = 500
   // console.log({widthPerc})
 
   return (
-      <div className={`relative  toast w-[400px] border ${borderColor[type]} rounded-lg overflow-hidden`}>
+      <div onMouseEnter={()=> setIsHovered(true)} 
+      onMouseLeave={()=> setIsHovered(false)}
+      className={`relative  toast w-[400px] border ${borderColor[type]} rounded-lg overflow-hidden`}>
         {canRemove && <button onClick={handleRemove} className="absolute right-2 top-1 bg-transparent">&times;</button>}
         <div className="flex items-center gap-3 p-3">
           <div className="flex items-center gap-2 flex-1 ">

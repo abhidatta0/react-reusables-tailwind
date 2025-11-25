@@ -4,9 +4,6 @@
 @tailwind utilities;
 
 @layer components{
-    .toast{
-        animation: slide .5s 1;
-    }
 
     .toast-container[data-position="top-right"]{
         @apply top-2 right-2
@@ -23,7 +20,25 @@
         @apply bottom-2 left-2
     }
 
-    @keyframes slide {
+    .toast-container[data-position="top-left"] .toast,
+    .toast-container[data-position="bottom-left"] .toast{
+       animation: slide-from-left .5s ease-out;
+    }
+
+    .toast-container[data-position="top-right"] .toast,
+    .toast-container[data-position="bottom-right"] .toast{
+       animation:  slide-from-right .5s ease-out;
+    }
+    @keyframes slide-from-left {
+        0%{
+            transform: translateX(-100%);
+        }
+        100%{
+            transform: translateX(0%);
+        }
+    }
+
+     @keyframes slide-from-right {
         0%{
             transform: translateX(100%);
         }
