@@ -1,21 +1,15 @@
-import { createContext, ReactNode, useCallback, useState,useContext, useEffect } from "react"
+import {  useCallback, useState, useEffect } from "react"
 import { ParamsFromComp } from "./Toast";
 import ToastContainer from "./ToastContainer";
-import ToastService from "./ToastService";
+import ToastService,{sendToast} from "./ToastService";
 
 export type Position = 'top-right'|'top-left'|"bottom-right"|'bottom-left';
 export type AddNotificationParam = Omit<ParamsFromComp,'id'>;
 
-type ToastContextType = {
-  addNotification:(params: AddNotificationParam) => void
-}
-const ToastContext = createContext<ToastContextType|null>(null);
-
 type Props = {
-    children: ReactNode;
-    position?: Position,
+  position?: Position,
 }
-const ToastProvider = ({children,position = 'top-right'}:Props) => {
+const ToastProvider = ({position = 'top-right'}:Props) => {
 
   const [toasts, setToasts] = useState<ParamsFromComp[]>([]);
 
@@ -35,23 +29,10 @@ const ToastProvider = ({children,position = 'top-right'}:Props) => {
   },[]);
   return (
     <>
-    <ToastContext.Provider value={{addNotification}}>
-   {children}
-   </ToastContext.Provider>
-   <ToastContainer toasts={toasts} handleRemove={handleRemove} position={position}/>
-   </>
+      <ToastContainer toasts={toasts} handleRemove={handleRemove} position={position}/>
+    </>
   )
 }
 export default ToastProvider;
 
-export const useToastContext = () => {
-  const toastContext = useContext(ToastContext);
-
-  if (!toastContext) {
-    throw new Error(
-      "useToastContext has to be used within <ToastProvider>"
-    );
-  }
-
-  return toastContext;
-};
+export { sendToast };

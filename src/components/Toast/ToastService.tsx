@@ -17,4 +17,12 @@ class ToastService{
     }
 }
 
-export default new ToastService();
+
+const store = new ToastService();
+
+export default store;
+
+// Global toast function
+export const sendToast = (data:AddNotificationParam) => {
+  return store.sendToast(data);
+};
