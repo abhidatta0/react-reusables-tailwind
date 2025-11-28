@@ -5,7 +5,7 @@ type Props = {
 }
 
 type PopoverContextType = {
-  contentRef:React.MutableRefObject<null>, 
+  contentRef:React.MutableRefObject<HTMLDivElement|null>, 
   isOpen: boolean,
   togglePopover:()=> void,
 }
@@ -21,10 +21,23 @@ const usePopoverContext = ()=>{
 const Popover = ({children}:Props) => {
 
   const [isOpen, setIsOpen] = useState(false);
-  const contentRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   const togglePopover = ()=>{
-    setIsOpen(!isOpen);
+    const newValue = !isOpen;
+    setIsOpen(newValue);
+    
+    if(newValue && contentRef.current){
+      const {top, left, height} = contentRef.current.getBoundingClientRect();
+      console.log({top, left, h: window.innerHeight, height});
+
+      const contentPosition = top+height;
+      if(contentPosition >= window.innerHeight){
+        contentRef.current.style.top = `-${height}px`
+      }else{
+        contentRef.current.style.top = '100%';
+      }
+    }
   }
 
   return (
@@ -60,8 +73,13 @@ type ContentProps = {
 }
 const Content = ({children}:ContentProps) => {
   const {isOpen, contentRef} = usePopoverContext();
-  if(!isOpen){return null}
-  return <div className="absolute top-full left-0 bg-white p-2 rounded-md text-black">{children}</div>;
+
+  const commonClassName = 'absolute top-full left-0 bg-white p-2 rounded-md text-black';
+  let className = commonClassName;
+  if(!isOpen){
+    className += ' invisible';
+  };
+  return <div ref={contentRef} className={className}>{children}</div>;
 }
 Popover.Action = Action;
 Popover.Content = Content;
