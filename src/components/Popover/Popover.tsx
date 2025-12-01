@@ -1,11 +1,15 @@
 import React,{ ReactNode, createContext, useContext, useRef, useState } from "react";
+import {createPortal} from 'react-dom';
 
 type Props = {
   children: ReactNode,
+  onOpen?:()=> void,
+  onClose?:()=> void,
 }
 
 type PopoverContextType = {
   contentRef:React.MutableRefObject<HTMLDivElement|null>, 
+  buttonRef:React.MutableRefObject<HTMLButtonElement|null>,
   isOpen: boolean,
   togglePopover:()=> void,
 }
@@ -18,31 +22,36 @@ const usePopoverContext = ()=>{
   }
   return context;
 }
-const Popover = ({children}:Props) => {
+const Popover = ({children, onClose, onOpen}:Props) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const togglePopover = ()=>{
     const newValue = !isOpen;
     setIsOpen(newValue);
     
-    if(newValue && contentRef.current){
-      const {top, left, height} = contentRef.current.getBoundingClientRect();
-      console.log({top, left, h: window.innerHeight, height});
+    if(newValue && contentRef.current && buttonRef.current){
+      const {top:bTop, left:bLeft, height:bHeight, bottom: bBottom} = buttonRef.current.getBoundingClientRect();
+      const contentPosition = bTop+bHeight;
 
-      const contentPosition = top+height;
-      if(contentPosition >= window.innerHeight){
-        contentRef.current.style.top = `-${height}px`
+      console.log({contentPosition,bTop,bBottom,bHeight, wh: window.innerHeight})
+      if(contentPosition <= window.innerHeight){
+        contentRef.current.style.top = `${bBottom}px`
       }else{
-        contentRef.current.style.top = '100%';
+        contentRef.current.style.top = `${bTop-bHeight-10}px`;
       }
+      contentRef.current.style.left = `${bLeft}px`;
+      onOpen?.()
+    }else{
+      onClose?.();
     }
   }
 
   return (
-    <PopoverContext.Provider value={{contentRef, isOpen,togglePopover}}>
-      <div className="relative">{children}</div>
+    <PopoverContext.Provider value={{contentRef, buttonRef, isOpen,togglePopover}}>
+      <div className="relative overflow-hidden">{children}</div>
     </PopoverContext.Provider>
   )
 }
@@ -56,15 +65,22 @@ type ActionProps={
     children: React.ReactNode,
 };
 const Action = (props:ActionProps) => {
-  const {togglePopover} = usePopoverContext();
+  const {togglePopover, buttonRef} = usePopoverContext();
+
+  const commonProps = {
+    ref:buttonRef,
+    onClick: togglePopover,
+    className: 'border'
+  };
+
   if('node' in props){
-    return <button onClick={togglePopover}>{props.node}</button>
+    return <button {...commonProps}>{props.node}</button>
   }
   if('children' in props){
-    return <button onClick={togglePopover}>{props.children}</button>
+    return <button {...commonProps}>{props.children}</button>
   }
   return (
-    <button onClick={togglePopover}>{props.label}</button>
+    <button {...commonProps}>{props.label}</button>
   )
 }
 
@@ -74,12 +90,12 @@ type ContentProps = {
 const Content = ({children}:ContentProps) => {
   const {isOpen, contentRef} = usePopoverContext();
 
-  const commonClassName = 'absolute top-full left-0 bg-white p-2 rounded-md text-black';
+  const commonClassName = 'absolute top-full left-0 bg-gray-100 p-2 rounded-md text-black';
   let className = commonClassName;
   if(!isOpen){
     className += ' invisible';
   };
-  return <div ref={contentRef} className={className}>{children}</div>;
+  return createPortal(<div ref={contentRef} className={className}>{children}</div>, document.body);
 }
 Popover.Action = Action;
 Popover.Content = Content;
